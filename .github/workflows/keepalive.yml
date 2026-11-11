@@ -1,0 +1,16 @@
+# กันฐานข้อมูล Supabase (แผนฟรี) หยุดทำงานเมื่อไม่มีคนใช้ 7 วัน
+# ต้องตั้ง Secrets ใน GitHub: SUPABASE_URL และ SUPABASE_ANON_KEY (ใส่ Publishable key)
+name: keep-supabase-awake
+on:
+  schedule:
+    - cron: '17 2 */3 * *'   # ทุก 3 วัน
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping database
+        run: |
+          curl -fsS "${{ secrets.SUPABASE_URL }}/rest/v1/houses?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" -o /dev/null
+          echo "ok"
