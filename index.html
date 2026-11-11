@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#6B7B4B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ป่าอุ่นใจ">
+<title>ป่าอุ่นใจ — สมุดรายรับรายจ่ายครอบครัว</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="img/appicon-192.png">
+<link rel="apple-touch-icon" href="img/appicon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#FBF7EC;--paper:#F3ECDA;--moss:#6B7B4B;--moss2:#4E5C2E;--earth:#8B5E3C;--ink:#4A3B2C;--muted:#8B6F50;--sky:#8FB3C4;--sand:#E8D9B5;--line:#E6D9BC;--inc:#E3EBD3;--exp:#F4E1D2;--rose:#B5654A}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:Sarabun,sans-serif;background:#E9E2CF;color:var(--ink);display:flex;justify-content:center;align-items:flex-start}
+h1,h2,h3,.mali{font-family:Mali,Sarabun,sans-serif;font-weight:600}
+button{font-family:inherit;color:inherit;border:none;background:none;cursor:pointer}
+input{font-family:inherit}
+.stage{display:flex;justify-content:center;padding:20px;width:100%}
+.side{width:260px;padding-top:20px}
+.side h1{font-size:22px;color:var(--moss2);margin-bottom:6px}
+.side p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.jump{display:flex;flex-direction:column;gap:6px}
+.jump button{text-align:left;background:var(--cream);border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;font-size:14px}
+.jump button:hover{border-color:var(--moss)}
+.phone{width:390px;height:820px;background:var(--cream);border-radius:44px;border:10px solid #3B3229;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(60,40,20,.25)}
+@media (max-width:760px){.stage{padding:0}.side{display:none}.phone{width:100vw;height:100vh;height:100dvh;border:none;border-radius:0;box-shadow:none}}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.on{display:flex;animation:fade .35s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:96px}
+.scroll::-webkit-scrollbar{width:0}
+.pad{padding:0 18px}
+.card{background:#fff;border:2px solid var(--line);border-radius:20px;padding:14px}
+.btn{display:block;width:100%;border-radius:18px;padding:14px;font-size:16px;font-weight:600;font-family:Mali,sans-serif;text-align:center}
+.btn.main{background:var(--moss);color:#fff}
+.btn.main:active{background:var(--moss2)}
+.btn.line{background:#06C755;color:#fff}
+.btn.ghost{background:#fff;border:2px solid var(--line)}
+.av{border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 0 0 2px var(--sand);background:#fff}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:13px;background:#fff;border:1.5px solid var(--line);white-space:nowrap}
+.chip.on{background:var(--moss);color:#fff;border-color:var(--moss)}
+.lbl{font-size:13px;color:var(--muted)}
+/* welcome */
+#welcome{background:var(--cream);align-items:center;justify-content:center;text-align:center;padding:30px}
+#welcome .hero{width:100%;max-width:330px;margin:10px 0 18px;animation:bob 4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+#welcome .logo{width:84px;border-radius:24px;margin-bottom:8px}
+/* login */
+#login .top{height:230px;background:url(img/banner_day.webp) center/cover;border-radius:0 0 32px 32px}
+.field{display:block;width:100%;padding:13px 14px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:15px;margin-bottom:10px;outline:none}
+.field:focus{border-color:var(--moss)}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:16px 0}
+.or:before,.or:after{content:"";flex:1;height:1.5px;background:var(--line)}
+/* profile */
+.pick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pick button{background:#fff;border:2px solid var(--line);border-radius:20px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:14px}
+.pick button.sel{border-color:var(--moss);background:#F1F4E8}
+/* island */
+#island{background:linear-gradient(#c4dbe6,#cde0e8);transition:background .8s}
+#island.night{background:linear-gradient(#153060,#1a396f)}
+.map{position:absolute;inset:0;overflow:hidden}
+.world{position:absolute;left:50%;top:53%;width:min(100%,62vh);aspect-ratio:2/3;transform:translate(-50%,-50%) scale(var(--z,1));-webkit-mask-image:linear-gradient(transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(transparent,#000 8%,#000 92%,transparent);transition:transform .6s cubic-bezier(.3,.7,.2,1);transform-origin:var(--ox,50%) var(--oy,50%)}
+.world .isl{position:absolute;inset:0;width:100%;height:100%;transition:opacity .8s}
+.world .isl.n{opacity:0}
+#island.night .world .isl.n{opacity:1}
+.spot{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
+.spot img{display:block;width:100%;transition:transform .2s}
+.spot:active img{transform:scale(.96)}
+.spot .n{position:absolute;inset:0;opacity:0;transition:opacity .8s}
+#island.night .spot .n{opacity:1}
+.spot.house img.base{filter:drop-shadow(0 6px 6px rgba(40,30,10,.25))}
+.tag{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;background:var(--cream);border:2px solid var(--moss);border-radius:12px;padding:2px 10px;font-size:12px;font-family:Mali;font-weight:600;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.tag.empty{border-style:dashed;border-color:var(--earth);color:var(--earth)}
+.sign{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);background:rgba(251,247,236,.95);border:2px solid var(--earth);color:#6B4A2C;border-radius:999px;padding:3px 12px;font-family:Mali;font-weight:600;font-size:13px;white-space:nowrap;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.1)}}
+.smoke{position:absolute;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.85);animation:smoke 3s ease-out infinite;pointer-events:none}
+.smoke.b{animation-delay:1s}.smoke.c{animation-delay:2s}
+@keyframes smoke{0%{transform:translate(0,0) scale(.6);opacity:0}20%{opacity:.9}100%{transform:translate(14px,-46px) scale(2.2);opacity:0}}
+.cloud{position:absolute;opacity:.85;pointer-events:none;animation:drift linear infinite}
+.cloud i{position:absolute;background:#fff;border-radius:50%}
+#island.night .cloud{opacity:.25}
+@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(560px)}}
+.firefly{position:absolute;width:4px;height:4px;border-radius:50%;background:#FFE88A;box-shadow:0 0 8px 3px rgba(255,230,120,.8);opacity:0;pointer-events:none}
+#island.night .firefly{animation:fly 4s ease-in-out infinite}
+@keyframes fly{0%,100%{opacity:0;transform:translate(0,0)}50%{opacity:1;transform:translate(10px,-12px)}}
+.topbar{position:absolute;top:0;left:0;right:0;padding:16px 16px 0;display:flex;align-items:center;gap:10px;z-index:5}
+.topbar .title{flex:1;background:rgba(251,247,236,.92);border-radius:18px;padding:8px 14px}
+.topbar .title b{font-family:Mali;font-size:17px;display:block}
+.round{width:44px;height:44px;border-radius:50%;background:rgba(251,247,236,.95);display:flex;align-items:center;justify-content:center;border:2px solid var(--line);flex:none}
+.round svg{width:22px;height:22px}
+.hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);background:var(--moss);color:#fff;border-radius:16px;padding:10px 16px;font-size:13px;white-space:nowrap;z-index:4;font-family:Mali}
+/* sheet */
+.veil{position:absolute;inset:0;background:rgba(40,30,15,.35);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
+.veil.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--cream);border-radius:28px 28px 0 0;padding:10px 18px 24px;transform:translateY(105%);transition:transform .35s cubic-bezier(.3,.8,.3,1);z-index:21;max-height:88%;overflow-y:auto}
+.sheet.on{transform:none}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--sand);margin:0 auto 14px}
+.styles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0 16px}
+.styles button{border:2px solid var(--line);border-radius:14px;background:#fff;padding:4px}
+.styles button.sel{border-color:var(--moss);background:#F1F4E8}
+.styles img{width:100%;display:block}
+/* house screens */
+.hhead{position:relative;height:150px;background:url(img/banner_day.webp) center 60%/cover;flex:none}
+.night .hhead{background-image:url(img/banner_night.webp)}
+.hhead .topbar{padding-top:14px}
+.mood{display:flex;align-items:flex-end;gap:10px;margin-top:-40px;position:relative;z-index:2}
+.bubble{background:#fff;border:2px solid var(--line);border-radius:18px 18px 18px 4px;padding:9px 13px;font-size:14px;margin-bottom:6px;flex:1}
+.bubble b{font-family:Mali}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.sum div{border-radius:20px;padding:12px 14px}
+.sum .i{background:var(--inc)}.sum .e{background:var(--exp)}
+.sum span{font-size:13px}
+.sum b{display:block;font-family:Mali;font-size:22px;margin-top:2px}
+.bar{height:12px;border-radius:9px;background:var(--paper);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:9px;background:var(--moss);transition:width .6s}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1.5px dashed var(--line)}
+.row:last-child{border-bottom:none}
+.row img.ic{width:44px;height:44px}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-weight:500;font-size:15px}
+.row .t small{color:var(--muted);font-size:12px}
+.amt{font-family:Mali;font-weight:600;font-size:16px}
+.amt.out{color:#8B4A2B}.amt.in{color:var(--moss2)}
+.sect{display:flex;justify-content:space-between;align-items:baseline;margin:18px 0 6px}
+.sect h3{font-size:16px}
+.sect a{font-size:13px;color:var(--moss);cursor:pointer}
+/* nav */
+.nav{position:absolute;bottom:0;left:0;right:0;height:84px;background:var(--cream);border-top:2px solid var(--line);display:flex;justify-content:space-around;align-items:flex-start;padding-top:10px;z-index:10}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--muted);width:64px}
+.nav button svg{width:24px;height:24px}
+.nav button.on{color:var(--moss2);font-weight:600}
+.nav .plus{width:62px;height:62px;border-radius:50%;background:var(--rose);color:#fff;margin-top:-28px;border:5px solid var(--cream);box-shadow:0 6px 14px rgba(140,70,40,.3);justify-content:center}
+.nav .plus svg{width:28px;height:28px}
+/* add */
+.seg{display:flex;background:var(--paper);border-radius:16px;padding:4px;margin:12px 0}
+.seg button{flex:1;padding:9px;border-radius:12px;font-weight:600;font-family:Mali;font-size:15px;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 0 var(--line)}
+.icgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px 6px}
+.icgrid button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:var(--ink);padding:4px 0;border-radius:16px;border:2px solid transparent}
+.icgrid button img{width:54px;height:54px;transition:transform .15s}
+.icgrid button.sel{border-color:var(--moss);background:#F1F4E8}
+.icgrid button.sel img{transform:scale(1.08)}
+.amount{display:flex;align-items:center;justify-content:center;gap:10px;font-family:Mali;font-size:38px;font-weight:600;margin:12px 0 8px;min-height:56px}
+.amount img{width:46px}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.keys button{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px;font-size:22px;font-family:Mali;font-weight:600}
+.keys button:active{background:var(--paper)}
+.opt{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:14px}
+.tog{width:46px;height:28px;border-radius:99px;background:var(--sand);position:relative;flex:none;transition:background .2s}
+.tog:after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+.tog.on{background:var(--moss)}.tog.on:after{left:21px}
+.err{color:#A32D2D;font-size:13px;text-align:center;min-height:18px}
+/* overlays */
+.pop{position:absolute;inset:0;background:rgba(251,247,236,.97);z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
+.pop.on{display:flex;animation:fade .3s}
+.pop img{width:80%;max-width:300px;margin-bottom:10px;animation:bob 2s ease-in-out infinite}
+/* dashboard */
+.donut{display:flex;align-items:center;gap:16px}
+.legend{flex:1;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.legend div{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend span{flex:1}
+.mem{display:flex;align-items:center;gap:10px;padding:8px 0}
+.mem .bar{flex:1}
+.chk{width:24px;height:24px;border-radius:8px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none;background:#fff}
+.chk.on{background:var(--moss);border-color:var(--moss)}
+.chk.on:after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.trend{display:flex;align-items:flex-end;gap:10px;height:120px;padding-top:10px}
+.trend div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted);height:100%;justify-content:flex-end}
+.trend i{width:100%;border-radius:8px 8px 4px 4px;background:var(--sky)}
+.trend div.cur i{background:var(--moss)}
+.warn{display:flex;align-items:center;gap:10px;background:#FBEDE4;border:2px solid #F0C9B4;border-radius:20px;padding:10px 12px;margin-top:12px}
+.warn img{width:86px}
+.lock{display:inline-block;font-size:11px;background:var(--paper);border-radius:6px;padding:1px 6px;margin-left:4px;color:var(--muted)}
+.qr{width:120px;height:120px;background:#fff;border:2px solid var(--line);border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(11,1fr);gap:1px}
+.qr i{background:var(--ink);border-radius:1px}
+.qr i.w{background:transparent}
+.menu .row{cursor:pointer}
+.menu .row .go{color:var(--muted)}
+.admin{background:#F1F4E8;border:2px dashed var(--moss);border-radius:16px;padding:8px 12px;font-size:13px;color:var(--moss2);margin-top:10px}
+
+.mf{display:flex;align-items:center;gap:8px;padding:10px 0 4px;overflow-x:auto}
+.mf::-webkit-scrollbar{height:0}
+.mf .lbl{flex:none}
+.mfb{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;font-size:13px;flex:none;transition:all .2s}
+.mfb img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.mfb.on{border-color:var(--moss);background:#F1F4E8;font-weight:600}
+.mfb:not(.on){opacity:.45}
+.mfb:not(.on) img{filter:grayscale(1)}
+.sum3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0 10px}
+.sum3 div{border-radius:18px;padding:10px 10px}
+.sum3 span{font-size:12px}
+.sum3 b{display:block;font-family:Mali;font-size:17px;margin-top:2px}
+.sum3 .s{background:#E2ECF1}
+.left{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:10px;font-size:14px}
+.left b{font-family:Mali;font-size:18px}
+.amt.sv{color:#3F6E8C}
+.due{display:flex;align-items:center;gap:10px;background:#FFF6E0;border:2px solid #EED59A;border-radius:18px;padding:8px 12px;margin-bottom:8px;cursor:pointer}
+.due img{width:38px;height:38px}
+.due .t{flex:1}
+.due b{font-size:14px;display:block}
+.due small{font-size:12px;color:#8A6A1F}
+.hs{display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scroll-snap-type:x mandatory}
+.hs::-webkit-scrollbar{height:0}
+.pcard{flex:none;width:230px;scroll-snap-align:start;background:#fff;border:2px solid var(--line);border-radius:20px;padding:12px;cursor:pointer}
+.pcard.add{width:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-style:dashed;color:var(--moss2);font-family:Mali;font-weight:600}
+.pcard .h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pcard .h img{width:40px;height:40px}
+.pcard .h b{font-family:Mali;font-size:15px;display:block}
+.pbar{height:14px;border-radius:9px;background:var(--paper);overflow:hidden;position:relative}
+.pbar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#8FB3C4,#6B9AB3)}
+.pbar.g i{background:linear-gradient(90deg,#9DB07A,#6B7B4B)}
+.pmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:5px}
+.mon{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.mon .m{width:54px;flex:none;color:var(--muted)}
+.mon .pbar{flex:1;height:12px}
+.mon .v{width:88px;text-align:right;flex:none;font-size:12px}
+.mon.ok .pbar i{background:var(--moss)}
+.mon.low .pbar i{background:#D9A55B}
+.mon.fut{opacity:.55}
+.mon.cur .m{color:var(--ink);font-weight:600}
+.big{font-family:Mali;font-size:26px;font-weight:600}
+.stack{display:flex;height:12px;border-radius:9px;overflow:hidden;background:var(--paper)}
+.stack i{display:block;height:100%}
+.key{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:6px}
+.key span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;background:var(--c)}
+.gain{font-size:12px;border-radius:8px;padding:1px 7px}
+.gain.up{background:#E3EBD3;color:var(--moss2)}.gain.dn{background:#FBEDE4;color:#A0452B}
+.subseg{display:flex;gap:8px;margin-bottom:10px}
+.subseg button{flex:1;display:flex;align-items:center;gap:8px;justify-content:center;background:#fff;border:2px solid var(--line);border-radius:16px;padding:6px;font-weight:600;font-family:Mali}
+.subseg button img{width:34px;height:34px}
+.subseg button.on{border-color:var(--moss);background:#F1F4E8}
+.who{display:flex;gap:8px;flex-wrap:wrap}
+.who button{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:999px;padding:3px 12px 3px 3px;font-size:13px}
+.who button img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.who button.on{border-color:var(--moss);background:#F1F4E8;font-weight:600}
+.annual{background:#fff;border:2px solid var(--line);border-radius:20px;padding:12px;margin-bottom:10px}
+.annual .h{display:flex;align-items:center;gap:10px}
+.annual .h img.ic{width:44px;height:44px}
+.annual .h .t{flex:1}
+.annual .h b{display:block;font-size:15px}
+.annual .h small{font-size:12px;color:var(--muted)}
+.annual .f{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1.5px dashed var(--line);font-size:13px}
+.annual.soon{border-color:#EED59A;background:#FFFBF0}
+.badge{font-size:11px;border-radius:8px;padding:2px 8px;background:#FFE8B0;color:#7A5A10;font-weight:600}
+.mini{font-size:12px;padding:5px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff}
+.mini.p{background:var(--moss);border-color:var(--moss);color:#fff}
+.guide{background:#EEF3F6;border:2px solid #CFDEE6;border-radius:20px;padding:12px 14px}
+.guide .row{border-bottom-color:#CFDEE6}
+.note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+.toast{position:absolute;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;border-radius:14px;padding:9px 16px;font-size:13px;opacity:0;transition:all .3s;z-index:40;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.frow{display:flex;gap:8px}
+.frow > *{flex:1}
+select.field{appearance:none}
+.done{opacity:.6}
+
+.demo-bar{position:absolute;top:0;left:0;right:0;z-index:50;background:#FFE8B0;color:#7A5A10;font-size:12px;text-align:center;padding:4px 8px}
+.demo-bar button{font-size:12px;text-decoration:underline;margin-left:6px;color:#7A5A10}
+.busy{position:absolute;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(251,247,236,.4)}
+.busy.on{display:flex}
+.busy div{width:34px;height:34px;border-radius:50%;border:4px solid var(--sand);border-top-color:var(--moss);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.link{color:var(--moss);cursor:pointer;text-decoration:underline}
+.fl{font-weight:600;margin:4px 0 6px;display:flex;align-items:center;gap:8px}
+.icpick{border:2px solid transparent;border-radius:50%;padding:1px;flex:none}
+.icpick.on{border-color:var(--moss)}
+.btn:disabled{opacity:.6}
+.field:disabled{background:var(--paper)}
+.row{cursor:default}
+#hlist .row,#recent .row{cursor:pointer}
+@media (min-width:761px){.phone{height:min(880px,calc(100vh - 40px))}}
+
+.mf{display:flex;align-items:center;gap:8px;padding:10px 0 4px;overflow-x:auto}
+.mf::-webkit-scrollbar{height:0}
+.mf .lbl{flex:none}
+.mfb{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:999px;padding:3px 10px 3px 3px;font-size:13px;flex:none;transition:all .2s}
+.mfb img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.mfb.on{border-color:var(--moss);background:#F1F4E8;font-weight:600}
+.mfb:not(.on){opacity:.45}
+.mfb:not(.on) img{filter:grayscale(1)}
+.sum3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0 10px}
+.sum3 div{border-radius:18px;padding:10px 10px}
+.sum3 span{font-size:12px}
+.sum3 b{display:block;font-family:Mali;font-size:17px;margin-top:2px}
+.sum3 .s{background:#E2ECF1}
+.left{display:flex;justify-content:space-between;align-items:center;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:10px;font-size:14px}
+.left b{font-family:Mali;font-size:18px}
+.amt.sv{color:#3F6E8C}
+.due{display:flex;align-items:center;gap:10px;background:#FFF6E0;border:2px solid #EED59A;border-radius:18px;padding:8px 12px;margin-bottom:8px;cursor:pointer}
+.due img{width:38px;height:38px}
+.due .t{flex:1}
+.due b{font-size:14px;display:block}
+.due small{font-size:12px;color:#8A6A1F}
+.hs{display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scroll-snap-type:x mandatory}
+.hs::-webkit-scrollbar{height:0}
+.pcard{flex:none;width:230px;scroll-snap-align:start;background:#fff;border:2px solid var(--line);border-radius:20px;padding:12px;cursor:pointer}
+.pcard.add{width:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-style:dashed;color:var(--moss2);font-family:Mali;font-weight:600}
+.pcard .h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pcard .h img{width:40px;height:40px}
+.pcard .h b{font-family:Mali;font-size:15px;display:block}
+.pbar{height:14px;border-radius:9px;background:var(--paper);overflow:hidden;position:relative}
+.pbar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#8FB3C4,#6B9AB3)}
+.pbar.g i{background:linear-gradient(90deg,#9DB07A,#6B7B4B)}
+.pmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:5px}
+.mon{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px}
+.mon .m{width:54px;flex:none;color:var(--muted)}
+.mon .pbar{flex:1;height:12px}
+.mon .v{width:88px;text-align:right;flex:none;font-size:12px}
+.mon.ok .pbar i{background:var(--moss)}
+.mon.low .pbar i{background:#D9A55B}
+.mon.fut{opacity:.55}
+.mon.cur .m{color:var(--ink);font-weight:600}
+.big{font-family:Mali;font-size:26px;font-weight:600}
+.stack{display:flex;height:12px;border-radius:9px;overflow:hidden;background:var(--paper)}
+.stack i{display:block;height:100%}
+.key{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:6px}
+.key span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;background:var(--c)}
+.gain{font-size:12px;border-radius:8px;padding:1px 7px}
+.gain.up{background:#E3EBD3;color:var(--moss2)}.gain.dn{background:#FBEDE4;color:#A0452B}
+.subseg{display:flex;gap:8px;margin-bottom:10px}
+.subseg button{flex:1;display:flex;align-items:center;gap:8px;justify-content:center;background:#fff;border:2px solid var(--line);border-radius:16px;padding:6px;font-weight:600;font-family:Mali}
+.subseg button img{width:34px;height:34px}
+.subseg button.on{border-color:var(--moss);background:#F1F4E8}
+.who{display:flex;gap:8px;flex-wrap:wrap}
+.who button{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--line);border-radius:999px;padding:3px 12px 3px 3px;font-size:13px}
+.who button img{width:30px;height:30px;border-radius:50%;object-fit:cover}
+.who button.on{border-color:var(--moss);background:#F1F4E8;font-weight:600}
+.annual{background:#fff;border:2px solid var(--line);border-radius:20px;padding:12px;margin-bottom:10px}
+.annual .h{display:flex;align-items:center;gap:10px}
+.annual .h img.ic{width:44px;height:44px}
+.annual .h .t{flex:1}
+.annual .h b{display:block;font-size:15px}
+.annual .h small{font-size:12px;color:var(--muted)}
+.annual .f{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1.5px dashed var(--line);font-size:13px}
+.annual.soon{border-color:#EED59A;background:#FFFBF0}
+.badge{font-size:11px;border-radius:8px;padding:2px 8px;background:#FFE8B0;color:#7A5A10;font-weight:600}
+.mini{font-size:12px;padding:5px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff}
+.mini.p{background:var(--moss);border-color:var(--moss);color:#fff}
+.guide{background:#EEF3F6;border:2px solid #CFDEE6;border-radius:20px;padding:12px 14px}
+.guide .row{border-bottom-color:#CFDEE6}
+.note{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+.toast{position:absolute;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;border-radius:14px;padding:9px 16px;font-size:13px;opacity:0;transition:all .3s;z-index:40;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.frow{display:flex;gap:8px}
+.frow > *{flex:1}
+select.field{appearance:none}
+.done{opacity:.6}
+.isl-bottom{position:absolute;left:12px;right:12px;bottom:14px;z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px}
+.isl-hint{background:rgba(251,247,236,.92);color:var(--moss2);border-radius:14px;padding:5px 14px;font-size:12px;font-family:Mali}
+.isl-btns{display:flex;gap:8px;width:100%}
+.isl-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--moss);color:#fff;border-radius:18px;padding:10px 8px;font-family:Mali;font-weight:600;font-size:14px;box-shadow:0 4px 0 rgba(60,70,30,.25)}
+.isl-btn img{width:26px;height:26px;border-radius:50%}
+.isl-btn.adm{background:var(--cream);color:var(--moss2);border:2px solid var(--moss)}
+.isl-btn[hidden]{display:none}
+#island .world{top:46%}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone" id="phone">
+
+    <div class="demo-bar" id="demoBar" hidden>โหมดทดลอง · ข้อมูลเก็บในเครื่องนี้เท่านั้น <button onclick="App.resetDemo()">รีเซ็ต</button></div>
+
+    <section class="screen on" id="loading" style="align-items:center;justify-content:center">
+      <img src="img/appicon.webp" width="84" style="border-radius:24px;animation:bob 1.6s ease-in-out infinite" alt="">
+      <p class="lbl" style="margin-top:10px">กำลังโหลด…</p>
+    </section>
+
+    <section class="screen" id="welcome">
+      <img class="logo" src="img/appicon.webp" alt="">
+      <h1 style="font-size:28px;color:var(--moss2)">ป่าอุ่นใจ</h1>
+      <p class="lbl" style="font-size:15px">สมุดรายรับรายจ่ายของครอบครัวเรา</p>
+      <img class="hero" src="img/state_welcome.webp" alt="ครอบครัวโบกมือทักทาย">
+      <button class="btn main" onclick="App.go('login')">เริ่มต้นใช้งาน</button>
+    </section>
+
+    <section class="screen" id="login">
+      <div class="top"></div>
+      <div class="scroll pad" style="margin-top:-26px;padding-bottom:30px">
+        <div class="card" style="padding:20px">
+          <h2 style="font-size:22px;margin-bottom:2px" id="authTitle">ยินดีต้อนรับกลับบ้าน</h2>
+          <p class="lbl" style="margin-bottom:16px" id="authSub">เข้าสู่ระบบเพื่อเริ่มจดบันทึก</p>
+          <form id="authForm" onsubmit="event.preventDefault();App.auth()">
+            <input class="field" type="email" id="email" placeholder="boy@example.com" autocomplete="email" required>
+            <input class="field" type="password" id="pw" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" autocomplete="current-password" minlength="6" required>
+            <p class="err" id="authErr"></p>
+            <button class="btn main" type="submit" id="authBtn">เข้าสู่ระบบ</button>
+          </form>
+          <p class="lbl" style="text-align:center;margin-top:14px"><span id="authSwitchTxt">ยังไม่มีบัญชี?</span> <a class="link" onclick="App.authMode()" id="authSwitch">สมัครสมาชิก</a></p>
+          <p class="lbl" style="text-align:center;margin-top:6px"><a class="link" onclick="App.forgot()">ลืมรหัสผ่าน</a></p>
+          <div class="or">หรือ</div>
+          <button class="btn ghost" style="opacity:.6" onclick="App.toast('LINE Login จะเปิดให้ใช้ในขั้นถัดไป')">เข้าสู่ระบบด้วย LINE (เร็วๆ นี้)</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="profile">
+      <div class="scroll pad" style="padding-top:28px">
+        <h2 style="font-size:22px">มาตั้งโปรไฟล์กันก่อน</h2>
+        <p class="lbl" style="margin-bottom:16px">แก้ไขภายหลังได้</p>
+        <p style="font-weight:600;margin-bottom:8px">เลือกตัวละครของคุณ</p>
+        <div class="pick" id="pick">
+          <button data-av="dad"><img class="av" src="img/av_dad_smile.jpg" width="76" height="76" alt="">พ่อ</button>
+          <button data-av="mom"><img class="av" src="img/av_mom_smile.jpg" width="76" height="76" alt="">แม่</button>
+          <button data-av="kid"><img class="av" src="img/av_kid_smile.jpg" width="76" height="76" alt="">ลูก</button>
+        </div>
+        <p style="font-weight:600;margin:18px 0 8px">ชื่อเล่น</p>
+        <input class="field" id="nick" maxlength="20" placeholder="BOY">
+        <p class="err" id="profErr"></p>
+        <button class="btn main" onclick="App.saveProfile()">ไปที่เกาะของฉัน</button>
+      </div>
+    </section>
+
+    <section class="screen" id="island">
+      <div class="map"><div class="world" id="world">
+        <img class="isl" src="img/island_day.webp" alt="เกาะ">
+        <img class="isl n" src="img/island_night.webp" alt="">
+        <div id="spots"></div>
+      </div></div>
+      <div class="topbar">
+        <img class="av" id="islAv" src="img/av_dad_smile.jpg" width="44" height="44" alt="" onclick="App.go('profile')" style="cursor:pointer">
+        <div class="title"><b id="islName">เกาะของฉัน</b><span class="lbl" id="islCount"></span></div>
+        <button class="round" title="กลางวัน/กลางคืน" onclick="App.toggleNight()"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      </div>
+      <div class="isl-bottom">
+        <div class="isl-hint" id="islHint">แตะบ้านเพื่อเข้า · แตะแปลงว่างเพื่อสร้าง</div>
+        <div class="isl-btns">
+          <button class="isl-btn" onclick="App.sheet('join')"><img src="img/ic_home.png" alt="">เข้าร่วมด้วยโค้ด</button>
+          <button class="isl-btn adm" id="adminBtn" hidden onclick="App.openAdmin()"><img src="img/ic_other.png" alt="">จัดการทุกบ้าน</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="home">
+      <div class="scroll">
+        <div class="hhead"><div class="topbar">
+          <button class="round" onclick="App.go('island')" title="กลับเกาะ"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18c3-1 5-4 9-4s6 3 9 4"/><path d="M12 14V6l5 2-5 2"/></svg></button>
+          <div class="title"><b class="hname"></b><span class="lbl" id="homeMonth"></span></div>
+        </div></div>
+        <div class="pad">
+          <div class="mood">
+            <img class="av" id="moodAv" src="img/av_kid_laugh.jpg" width="86" height="86" alt="">
+            <div class="bubble" id="moodText"></div>
+          </div>
+          <div class="mf" data-mf></div>
+          <div class="sum3">
+            <div style="background:var(--inc)"><span>รายรับ</span><b id="sIn"></b></div>
+            <div style="background:var(--exp)"><span>รายจ่าย</span><b id="sOut"></b></div>
+            <div class="s"><span>ออม/ลงทุน</span><b id="sSave"></b></div>
+          </div>
+          <div class="left"><span>เงินคงเหลือตอนนี้<br><small class="lbl">นับจากยอดตั้งต้น · เดือนนี้ <b id="sMonth" style="font-size:13px"></b></small></span><b id="sLeft"></b></div>
+          <div class="card" id="budgetCard">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>งบรายจ่าย <b id="bUsed"></b></span><span class="lbl" id="bLeft"></span></div>
+            <div class="bar"><i id="bBar"></i></div>
+          </div>
+          <div id="dueBox" style="margin-top:12px"></div>
+          <div class="sect"><h3>โปรเจคออมของบ้าน</h3><a onclick="App.go('dash')">ดูทั้งหมด</a></div>
+          <div class="hs" id="projCards"></div>
+          <div class="sect"><h3>รายการล่าสุด</h3><a onclick="App.go('history')">ดูทั้งหมด</a></div>
+          <div class="card" id="recent" style="padding:4px 14px"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="add">
+      <div class="scroll pad" style="padding-top:18px;padding-bottom:30px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="round" onclick="App.back()" title="ปิด"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          <h2 style="font-size:20px">เพิ่มรายการ</h2>
+        </div>
+        <div class="seg"><button id="seg_out" onclick="App.setType('out')">รายจ่าย</button><button id="seg_in" onclick="App.setType('in')">รายรับ</button><button id="seg_save" onclick="App.setType('save')">ออม/ลงทุน</button></div>
+        <div class="guide" id="wallet" style="display:none;margin-bottom:12px;padding:10px 12px"></div>
+        <div id="saveBox" style="display:none">
+          <div class="subseg"><button id="k_save" onclick="App.setKind('save')"><img src="img/ic_savings.png" alt="">เงินออม</button><button id="k_inv" onclick="App.setKind('inv')"><img src="img/ic_invest.png" alt="">เงินลงทุน</button></div>
+          <div style="display:flex;gap:6px;margin-bottom:12px" id="acts"></div>
+          <p class="lbl" style="margin-bottom:6px" id="whoLbl">ให้ใคร</p>
+          <div class="who" id="whoBox"></div>
+        </div>
+        <div id="catBox">
+          <p class="lbl" style="margin-bottom:6px">1 · เลือกหมวด</p>
+          <div class="icgrid" id="icgrid"></div>
+        </div>
+        <p class="lbl" style="margin:14px 0 0" id="amtLbl">2 · ใส่จำนวนเงิน</p>
+        <div class="amount"><img id="amtIc" src="img/ic_food.png" alt=""><span id="amt">฿0</span></div>
+        <div class="keys" id="keys"></div>
+        <div class="card" style="margin-top:12px;padding:6px 14px">
+          <div class="opt"><span style="flex:1">วันที่</span><input type="date" id="txDate" style="border:none;outline:none;font-size:14px;background:none;font-family:inherit;color:inherit"></div>
+          <div class="opt" style="border-top:1.5px dashed var(--line)"><span style="flex:1">โน้ต</span><input id="note" maxlength="200" placeholder="ก๋วยเตี๋ยวหน้าปากซอย" style="border:none;outline:none;text-align:right;font-size:14px;width:60%;background:none"></div>
+          <div class="opt" id="projPayRow" style="border-top:1.5px dashed var(--line);flex-wrap:wrap"><span style="flex:1">จ่ายจากโปรเจค<br><small class="lbl">ไม่นับในงบรายเดือน</small></span><div class="who" id="projPay"></div></div>
+          <div class="opt" style="border-top:1.5px dashed var(--line)"><span style="flex:1">แนบรูปใบเสร็จ<br><small class="lbl" id="rcName"></small></span><label class="chip" style="cursor:pointer">+ เลือกรูป<input type="file" id="rcFile" accept="image/*" hidden onchange="App.pickReceipt(this)"></label></div>
+          <div class="opt" style="border-top:1.5px dashed var(--line)"><span style="flex:1">เป็นรายการส่วนตัว<br><small class="lbl">คนอื่นเห็นแค่ยอดรวม</small></span><button class="tog" id="priv" onclick="this.classList.toggle('on')"></button></div>
+        </div>
+        <p class="err" id="addErr"></p>
+        <button class="btn main" id="saveBtn" onclick="App.saveTx()">บันทึก</button>
+      </div>
+    </section>
+
+    <section class="screen" id="history">
+      <div class="scroll"><div class="pad" style="padding-top:20px">
+        <h2 style="font-size:20px">ประวัติรายการ</h2>
+        <div class="mf" data-mf></div>
+        <input class="field" id="q" placeholder="ค้นหา เช่น ก๋วยเตี๋ยว" oninput="App.render()" style="margin-top:6px">
+        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px" id="hf"></div>
+        <div id="hlist"></div>
+      </div></div>
+    </section>
+
+    <section class="screen" id="dash">
+      <div class="scroll"><div class="pad" style="padding-top:20px">
+        <h2 style="font-size:20px">สรุปผล</h2>
+        <div class="mf" data-mf></div>
+        <div style="display:flex;gap:6px;margin:8px 0 10px" id="per"></div>
+        <div class="card">
+          <p class="lbl" style="margin-bottom:8px">รายจ่ายตามหมวด (ไม่รวมเงินออม)</p>
+          <div class="donut"><svg id="donut" width="130" height="130" viewBox="0 0 42 42"></svg><div class="legend" id="legend"></div></div>
+        </div>
+        <div class="card" style="margin-top:12px"><p class="lbl">รายจ่ายรายคน</p><div id="mems"></div></div>
+        <div id="overBox"></div>
+        <div class="sect"><h3>ออมและลงทุน</h3></div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><p class="lbl">เงินออมสะสม</p><p class="big" id="dSave" style="color:#3F6E8C"></p></div>
+            <div><p class="lbl">มูลค่าลงทุน</p><p class="big" id="dInv" style="color:var(--moss2)"></p><p class="lbl" id="dInvP"></p></div>
+          </div>
+          <div id="svMem" style="margin-top:10px"></div>
+          <div class="key"><span style="--c:#8FB3C4">เงินออม</span><span style="--c:#8C9E62">เงินลงทุน</span></div>
+        </div>
+        <div class="card" style="margin-top:12px"><p class="lbl">ยอดออม + ลงทุนสะสม 6 เดือน</p><div class="trend" id="svTrend"></div></div>
+        <div class="sect"><h3>โปรเจคออมของบ้าน</h3><a onclick="App.sheet('newproj')">+ สร้างโปรเจค</a></div>
+        <div id="projList"></div>
+        <div class="sect"><h3>แนวโน้มรายจ่าย 6 เดือน</h3></div>
+        <div class="card"><div class="trend" id="trend"></div></div>
+      </div></div>
+    </section>
+
+    <section class="screen" id="proj">
+      <div class="scroll"><div class="pad" style="padding-top:18px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="round" onclick="App.back()" title="กลับ"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <span class="lbl">โปรเจคออมของบ้าน</span>
+        </div>
+        <div class="mf" data-mf></div>
+        <div id="projBody"></div>
+      </div></div>
+    </section>
+
+    <section class="screen" id="annual">
+      <div class="scroll"><div class="pad" style="padding-top:18px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="round" onclick="App.go('house')" title="กลับ"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <h2 style="font-size:20px">ค่าใช้จ่ายรายปี</h2>
+        </div>
+        <div class="mf" data-mf></div>
+        <div class="guide" style="margin-top:8px">
+          <p class="lbl">ไกด์: ควรกันเงินไว้เดือนละ</p>
+          <p class="big" id="anTotal"></p>
+          <div id="anPer"></div>
+          <p class="note">เป็นตัวช่วยวางแผนเท่านั้น ไม่หักจากเงินคงเหลือและไม่นับในงบ</p>
+        </div>
+        <div class="sect"><h3>รายการ</h3><a onclick="App.sheet('annual')">+ เพิ่มรายการ</a></div>
+        <div id="anList"></div>
+      </div></div>
+    </section>
+
+    <section class="screen" id="opening">
+      <div class="scroll"><div class="pad" style="padding-top:18px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="round" onclick="App.openingBack()" title="กลับ"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <h2 style="font-size:20px" id="opTitle"></h2>
+        </div>
+        <p class="lbl" id="opNote" style="margin:8px 0 10px"></p>
+        <div class="who" id="opWho" style="margin-bottom:12px"></div>
+        <div class="card">
+          <p class="lbl">ณ วันที่</p><input class="field" type="date" id="op_date">
+          <p class="fl"><img src="img/ic_salary.png" width="30" alt="">เงินสด / เงินในบัญชีที่ใช้จ่าย</p>
+          <input class="field" id="op_cash" inputmode="decimal" placeholder="0">
+          <p class="fl"><img src="img/ic_savings.png" width="30" alt="">เงินออม</p>
+          <input class="field" id="op_save" inputmode="decimal" placeholder="0">
+          <p class="fl"><img src="img/ic_invest.png" width="30" alt="">เงินลงทุน</p>
+          <div class="frow"><div><p class="lbl">เงินต้นที่ลงไป</p><input class="field" id="op_inv" inputmode="decimal" placeholder="0"></div><div><p class="lbl">มูลค่าปัจจุบัน</p><input class="field" id="op_val" inputmode="decimal" placeholder="0"></div></div>
+          <p class="note">ยอดตั้งต้นไม่นับเป็นรายรับหรือเงินที่ออมเดือนนี้ และไม่เข้ากราฟแนวโน้มรายเดือน</p>
+        </div>
+        <p class="err" id="opErr"></p>
+        <button class="btn main" onclick="App.saveOpening()">บันทึกยอดตั้งต้น</button>
+        <button class="btn ghost" id="opSkip" style="margin-top:10px" onclick="App.go('home')">ข้ามไปก่อน (ตั้งทีหลังได้)</button>
+      </div></div>
+    </section>
+
+    <section class="screen" id="admin">
+      <div class="scroll"><div class="pad" style="padding-top:18px;padding-bottom:30px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="round" onclick="App.go('island')" title="กลับ"><svg viewBox="0 0 24 24" fill="none" stroke="#6B7B4B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <h2 style="font-size:20px">จัดการทุกบ้าน</h2><span class="badge" style="margin-left:auto">Admin</span>
+        </div>
+        <div class="guide" style="margin:12px 0">
+          <p class="lbl">รายจ่ายเดือนนี้ของบ้านที่เลือก</p><p class="big" id="admSum">฿0</p>
+          <p class="note">ติ๊กเลือกบ้านที่จะรวมยอด · รายการส่วนตัวนับในยอดรวมแต่ไม่แสดงรายละเอียด</p>
+        </div>
+        <div id="admList"></div>
+      </div></div>
+    </section>
+
+    <section class="screen" id="house">
+      <div class="scroll"><div class="pad" style="padding-top:20px">
+        <div style="display:flex;align-items:center;gap:12px"><img id="hsImg" src="img/house_cottage_day.webp" width="74" alt=""><div style="flex:1"><h2 style="font-size:20px" class="hname"></h2><span class="lbl" id="hsSub"></span></div><button class="chip" id="hsEdit" onclick="App.sheet('edithouse')">แก้ไข</button></div>
+        <div class="sect"><h3>วางแผนการเงิน</h3></div>
+        <div class="card menu" style="padding:4px 14px">
+          <div class="row" onclick="App.go('annual')"><img class="ic" src="img/ic_utilities.png" alt=""><div class="t"><b>ค่าใช้จ่ายรายปี</b><small>ประกัน ภาษีรถ ค่าเทอม ล้างแอร์ …</small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.go('dash')"><img class="ic" src="img/ic_travel.png" alt=""><div class="t"><b>โปรเจคออมของบ้าน</b><small id="hpCount"></small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.openOpening('edit')"><img class="ic" src="img/ic_salary.png" alt=""><div class="t"><b>ยอดตั้งต้น (ยอดยกมา)</b><small>เงินสด เงินออม เงินลงทุน ของแต่ละคน</small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.sheet('budget')"><img class="ic" src="img/ic_savings.png" alt=""><div class="t"><b>งบรายจ่ายต่อเดือน</b><small id="hsBudget"></small></div><span class="go">›</span></div>
+        </div>
+        <div class="sect"><h3>สมาชิก</h3></div>
+        <div class="card" style="padding:4px 14px" id="hsMembers"></div>
+        <div class="sect"><h3>เชิญสมาชิกใหม่</h3></div>
+        <div class="card" style="display:flex;gap:14px;align-items:center">
+          <div id="qr" style="width:120px;height:120px;flex:none;background:#fff;border:2px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden"></div>
+          <div><p class="lbl">โค้ดเชิญ</p><p class="mali" style="font-size:22px;letter-spacing:2px" id="hsCode"></p><button class="chip" style="margin-top:6px" onclick="App.copyInvite()">คัดลอกลิงก์เชิญ</button></div>
+        </div>
+        <div class="sect"><h3>ตั้งค่า</h3></div>
+        <div class="card menu" style="padding:4px 14px">
+          <div class="row" onclick="App.go('profile')"><img class="ic" src="img/ic_kids.png" alt=""><div class="t"><b>โปรไฟล์ของฉัน</b><small>ชื่อเล่น และตัวละคร</small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.exportCsv()"><img class="ic" src="img/ic_education.png" alt=""><div class="t"><b>ส่งออก Excel (CSV)</b><small>ดาวน์โหลดรายการทั้งหมดของบ้านนี้</small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.toggleNight()"><img class="ic" src="img/ic_utilities.png" alt=""><div class="t"><b>กลางวัน / กลางคืน</b><small>อัตโนมัติหลัง 18:00</small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.sheet('leave')"><img class="ic" src="img/ic_home.png" alt=""><div class="t"><b>ออกจากบ้านนี้</b><small></small></div><span class="go">›</span></div>
+          <div class="row" onclick="App.signOut()"><img class="ic" src="img/ic_phone.png" alt=""><div class="t"><b>ออกจากระบบ</b><small id="hsEmail"></small></div><span class="go">›</span></div>
+        </div>
+      </div></div>
+    </section>
+
+    <nav class="nav" id="nav" style="display:none">
+      <button data-s="home" onclick="App.go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>หน้าแรก</button>
+      <button data-s="history" onclick="App.go('history')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>ประวัติ</button>
+      <button class="plus" onclick="App.openAdd({})" title="เพิ่มรายการ"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button data-s="dash" onclick="App.go('dash')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 20V12M12 20V5M19 20v-9"/></svg>สรุปผล</button>
+      <button data-s="house" onclick="App.go('house')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M17 11a3 3 0 1 0 0-6M21 20c0-2.6-1.4-4.6-3.5-5.5"/></svg>บ้าน</button>
+    </nav>
+
+    <div class="veil" id="veil" onclick="App.closeSheet()"></div>
+    <div class="sheet" id="sheet"><div class="grab"></div><div id="sheetBody"></div></div>
+    <div class="pop" id="pop"><img id="popImg" src="img/state_saved.webp" alt=""><h2 id="popT" style="font-size:24px;color:var(--moss2)">บันทึกแล้ว</h2><p class="lbl" id="popS" style="font-size:15px;margin-top:4px"></p></div>
+    <div class="toast" id="toast"></div>
+    <div class="busy" id="busy"><div></div></div>
+  </div>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
